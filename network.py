@@ -11,11 +11,11 @@ from torchvision.models import vgg19, VGG19_Weights
 import os
 
 # Check for GPU availability
-device = torch.device("mps" if torch.mps.is_available() else "cpu")
+device = torch.device("cpu")
 torch.set_default_device(device)
 
 # Image loader and settings
-imsize = 512  # Use smaller size if no GPU
+imsize = 128  # Use smaller size if no GPU
 loader = transforms.Compose([
     transforms.Resize(imsize),
     transforms.ToTensor()
@@ -212,16 +212,15 @@ def on_top_of(style_path, content_path, output_path, start_x, start_y, width, he
     # Load images
     style_img, content_img = load_and_resize_images(style_path, content_path)
 
-    # Clone the content image for editing
     input_img = content_img.clone()
 
-    # Extract the ROI (Region of Interest) from the content image
+    # Region of Interest from the content image
     content_roi = content_img[:, :, start_y:start_y + height, start_x:start_x + width]
 
-    # Resize the style image to match ROI dimensions
+    # Resize the style image to match Region of Interest
     style_roi = transforms.Resize((content_roi.shape[2], content_roi.shape[3]))(style_img)
 
-    # Initialize VGG model and normalization parameters
+
     cnn = vgg19(weights=VGG19_Weights.DEFAULT).features.eval()
     cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
     cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
@@ -232,10 +231,10 @@ def on_top_of(style_path, content_path, output_path, start_x, start_y, width, he
         content_roi, style_roi, content_roi.clone(), num_steps=num_steps
     )
 
-    # Replace the ROI in the original content image with the stylized ROI
+    # Replace the Region of Interest in the original content image with the stylized ROI
     input_img[:, :, start_y:start_y + height, start_x:start_x + width] = output_roi
 
-    # Convert the final tensor to an image and save
+    # To tensor to an image and save
     unloader = transforms.ToPILImage()
     output_image = unloader(input_img.squeeze(0).cpu())
     output_image.save(output_path)
