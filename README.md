@@ -17,7 +17,17 @@ Image Displayed:
 
 
 ## Results
-Example of the on top of feature applying it on the image:
+
+### Style Image:
+
+![360_F_836750955_LVolMx61cAuIFVBbY2ttnR9msbCvkWFv](https://github.com/user-attachments/assets/46dc3f1f-6f1d-4a21-b648-f7f74652cca6)
+
+### Content Image:
+
+![Uploading pexels-ekamelev-1096298.jpg…]()
+
+
+### on_top_of feature applying it on the image:
 ![Good try](https://github.com/user-attachments/assets/df4e745e-72d0-4547-9a74-9f85eb3e1f38)
 
 ## References
