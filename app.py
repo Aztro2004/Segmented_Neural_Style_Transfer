@@ -49,7 +49,7 @@ def index():
         content_image.save(content_path)
 
         # Output file name and path
-        output_filename = 'output.jpg'  # Name of the processed image
+        output_filename = 'output.jpg' 
         output_path = os.path.join(app.config['OUTPUT_FOLDER'], output_filename)
 
         # Perform style transfer or partial transfer
