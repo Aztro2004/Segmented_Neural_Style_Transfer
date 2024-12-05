@@ -17,7 +17,7 @@ Image Displayed:
 
 
 ## Results
-Example of the on top of feature applying it on half of the image:
+Example of the on top of feature applying it on the image:
 ![Good try](https://github.com/user-attachments/assets/df4e745e-72d0-4547-9a74-9f85eb3e1f38)
 
 ## References
