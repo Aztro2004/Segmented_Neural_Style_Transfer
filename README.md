@@ -20,4 +20,6 @@ Image Displayed:
 Example of the on top of feature applying it on half of the image:
 ![Good try](https://github.com/user-attachments/assets/df4e745e-72d0-4547-9a74-9f85eb3e1f38)
 
+## References
+- [Neural Style Transfer Tutorial](https://pytorch.org/tutorials/advanced/neural_style_tutorial.html) - A step-by-step guide from the PyTorch team on implementing neural style transfer.
 
