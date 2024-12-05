@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # Configure upload and output folders
 UPLOAD_FOLDER = 'uploads'
-OUTPUT_FOLDER = 'static/output'  # Make sure this folder is inside the static folder
+OUTPUT_FOLDER = 'static/output'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -66,7 +66,6 @@ def index():
         if not os.path.exists(output_path):
             return f"Error: Output image not saved at {output_path}"
 
-        # Print output path for debugging purposes
         print(f"Image saved at: {output_path}")
 
         # Correct path to image for rendering
