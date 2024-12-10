@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 from torchvision.models import vgg19, VGG19_Weights
 import os
-
 # Check for GPU availability
 device = torch.device("cpu")
 torch.set_default_device(device)
+
 
 # Image loader and settings
 imsize = 128  # Use smaller size if no GPU
@@ -84,7 +84,6 @@ def gram_matrix(input):
     G = torch.mm(features, features.t())  # Compute gram product
     return G.div(a * b * c * d)
 
-
 class StyleLoss(nn.Module):
     """
     Loss class for style matching during style transfer.
@@ -93,11 +92,39 @@ class StyleLoss(nn.Module):
         super(StyleLoss, self).__init__()
         self.target = gram_matrix(target_feature).detach()
 
+        # Create a weighting tensor using PyTorch
+        self.weight = torch.linspace(2, 0, steps=self.target.size(-1)).to(self.target.device)
+
     def forward(self, input):
         G = gram_matrix(input)
-        self.loss = F.mse_loss(G, self.target)
+
+        # Ensure the weight tensor is broadcastable
+        weighted_target = self.target * self.weight.view(1, -1)
+        self.loss = F.mse_loss(G, weighted_target)
         return input
 
+
+class StyleLoss2(nn.Module):
+    """
+    Loss class for style matching during style transfer.
+    """
+    def __init__(self, target_feature):
+        super(StyleLoss2, self).__init__()
+        self.target = gram_matrix(target_feature).detach()
+
+        # Create a weighting tensor using PyTorch
+        self.weight = torch.linspace(0, 2, steps=self.target.size(-1)).to(self.target.device)
+
+    def forward(self, input):
+        G = gram_matrix(input)
+
+        # Ensure the weight tensor is broadcastable
+        weighted_target = self.target * self.weight.view(1, -1)
+        self.loss = F.mse_loss(G, weighted_target)
+        return input
+
+def get_input_optimizer(input_img):
+    return optim.LBFGS([input_img.requires_grad_()])
 
 class Normalization(nn.Module):
     """
@@ -111,13 +138,12 @@ class Normalization(nn.Module):
     def forward(self, img):
         return (img - self.mean) / self.std
 
-
 def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
-                               style_img, content_img,
+                               style_img, style_img2, content_img,
                                content_layers=['conv_4'],
                                style_layers=['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']):
     """
-    Build the style transfer model and losses.
+    Build the style transfer model and losses, incorporating StyleLoss and StyleLoss2.
     """
     normalization = Normalization(normalization_mean, normalization_std)
 
@@ -143,6 +169,7 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
 
         model.add_module(name, layer)
 
+        # Content Loss
         if name in content_layers:
             target = model(content_img).detach()
             content_loss = ContentLoss(target)
@@ -150,13 +177,19 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
             content_losses.append(content_loss)
 
         if name in style_layers:
-            target_feature = model(style_img).detach()
-            style_loss = StyleLoss(target_feature)
-            model.add_module(f"style_loss_{i}", style_loss)
+            target_feature_1 = model(style_img).detach()
+            target_feature_2 = model(style_img2).detach()
+
+            style_loss = StyleLoss(target_feature_1)
+            model.add_module(f"style_loss_{i}_1", style_loss)
             style_losses.append(style_loss)
 
+            style_loss_2 = StyleLoss2(target_feature_2)
+            model.add_module(f"style_loss_{i}_2", style_loss_2)
+            style_losses.append(style_loss_2)
+
     for i in range(len(model) - 1, -1, -1):
-        if isinstance(model[i], ContentLoss) or isinstance(model[i], StyleLoss):
+        if isinstance(model[i], ContentLoss) or isinstance(model[i], StyleLoss) or isinstance(model[i], StyleLoss2):
             break
 
     model = model[:(i + 1)]
@@ -164,18 +197,14 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
     return model, style_losses, content_losses
 
 
-def get_input_optimizer(input_img):
-    return optim.LBFGS([input_img.requires_grad_()])
-
-
 def run_style_transfer(cnn, normalization_mean, normalization_std,
-                       content_img, style_img, input_img, num_steps=300,
+                       content_img, style_img, style_img2, input_img, num_steps=300,
                        style_weight=1000000, content_weight=1):
     """
-    Perform style transfer using the VGG19 network.
+    Perform style transfer using the VGG19 network with StyleLoss and StyleLoss2.
     """
     model, style_losses, content_losses = get_style_model_and_losses(
-        cnn, normalization_mean, normalization_std, style_img, content_img
+        cnn, normalization_mean, normalization_std, style_img, style_img2, content_img
     )
 
     optimizer = get_input_optimizer(input_img)
@@ -188,6 +217,8 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
 
             optimizer.zero_grad()
             model(input_img)
+
+            # losses
             style_score = sum(sl.loss for sl in style_losses) * style_weight
             content_score = sum(cl.loss for cl in content_losses) * content_weight
             loss = style_score + content_score
@@ -205,135 +236,30 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
 
     return input_img
 
-def on_top_of(style_path, content_path, output_path, start_x, start_y, width, height, num_steps=300):
+
+def style_transfer(style_path1, style_path2, content_path, output_path, num_steps=300):
     """
-    Perform style transfer on a specific region of the content image and blend it with the original.
-    Save the final output image.
+    Perform style transfer with two style images and save the output.
     """
     # Load images
-    style_img, content_img = load_and_resize_images(style_path, content_path)
+    style_img1, content_img = load_and_resize_images(style_path1, content_path)
+    style_img2, _ = load_and_resize_images(style_path2, content_path)
 
     input_img = content_img.clone()
 
-    # Region of Interest from the content image
-    content_roi = content_img[:, :, start_y:start_y + height, start_x:start_x + width]
-
-    # Resize the style image to match Region of Interest
-    style_roi = transforms.Resize((content_roi.shape[2], content_roi.shape[3]))(style_img)
-
-
+    # Load pre-trained VGG19
     cnn = vgg19(weights=VGG19_Weights.DEFAULT).features.eval()
     cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
     cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
-    # Run style transfer on the ROI
-    output_roi = run_style_transfer(
-        cnn, cnn_normalization_mean, cnn_normalization_std,
-        content_roi, style_roi, content_roi.clone(), num_steps=num_steps
-    )
-
-    # Replace the Region of Interest in the original content image with the stylized ROI
-    input_img[:, :, start_y:start_y + height, start_x:start_x + width] = output_roi
-
-    # To tensor to an image and save
-    unloader = transforms.ToPILImage()
-    output_image = unloader(input_img.squeeze(0).cpu())
-    output_image.save(output_path)
-    print(f"Stylized image saved to {output_path}")
-
-
-def style_transfer(style_path, content_path, output_path, num_steps=300):
-    """
-    Perform style transfer on uploaded images and save the output.
-    """
-    style_img, content_img = load_and_resize_images(style_path, content_path)
-    input_img = content_img.clone()
-
-    cnn = vgg19(weights=VGG19_Weights.DEFAULT).features.eval()
-    cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
-    cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
-
+    # Perform style transfer
     output = run_style_transfer(
         cnn, cnn_normalization_mean, cnn_normalization_std,
-        content_img, style_img, input_img, num_steps=num_steps
+        content_img, style_img1, style_img2, input_img, num_steps=num_steps
     )
 
+    # Convert tensor to image and save
     unloader = transforms.ToPILImage()
     output_image = unloader(output.squeeze(0).cpu())
     output_image.save(output_path)
     print(f"Stylized image saved to {output_path}")
-
-def blend_images(image1, image2, alpha=0.5):
-    """
-    Blends two images together using a weighted average with varying weights along the width.
-    
-    Args:
-        image1 (Tensor): The first image tensor (C x H x W).
-        image2 (Tensor): The second image tensor (C x H x W).
-        alpha (float): The weight of the first image. Default is 0.5 (equal blending).
-        
-    Returns:
-        Tensor: The blended image.
-    """
-    # Create linearly spaced tensors for blending across the width
-    tensor_1 = torch.tensor(np.linspace(2, 0, num=image1.size()[3]), dtype=torch.float32).to(image1.device)
-    tensor_2 = torch.tensor(np.linspace(0, 2, num=image2.size()[3]), dtype=torch.float32).to(image2.device)
-
-    blended_image = (tensor_1 * image1 + tensor_2 * image2) / 2
-    
-    return blended_image
-
-def run_blended_style(style1_path, style2_path, content_path, output_path, num_steps=300):
-    """
-    Perform style transfer on the content image using a blended style from two style images.
-    
-    Args:
-        style1_path (str): Path to the first style image.
-        style2_path (str): Path to the second style image.
-        content_path (str): Path to the content image.
-        output_path (str): Path to save the final blended output image.
-        num_steps (int): Number of optimization steps for style transfer.
-    """
-    # Load the content image
-    style1_img, content_img = load_and_resize_images(style1_path, content_path)
-    style2_img, _ = load_and_resize_images(style2_path, content_path)
-
-    # Blend the style images together
-    blended_style = blend_images(style1_img, style2_img)
-
-    # Define the CNN model and normalization parameters
-    cnn = vgg19(weights=VGG19_Weights.DEFAULT).features.eval()
-    cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
-    cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
-
-    # Perform style transfer on the content image using the blended style
-    input_img = content_img.clone()
-    output = run_style_transfer(
-        cnn, cnn_normalization_mean, cnn_normalization_std,
-        content_img, blended_style, input_img, num_steps=num_steps
-    )
-
-    # Convert the final stylized tensor to an image and save it
-    unloader = transforms.ToPILImage()
-    output_image = unloader(output.squeeze(0).cpu())
-    output_image.save(output_path)
-    print(f"Stylized image with blended style saved to {output_path}")
-
-
-'''
-if __name__ == "__main__":
-    style_path = "/content/360_F_836750955_LVolMx61cAuIFVBbY2ttnR9msbCvkWFv.jpg"
-    content_path = "/content/pexels-ekamelev-1096298.jpg"
-    output_path = "./output.jpg"
-    print(Select an option for editing
-          1.- Whole Image transformation
-          2.- Segment transformation)
-    option = input('Type option:').strip()
-    if option == '1':
-        style_transfer(style_path, content_path, output_path)
-    elif option == '2':
-        start_x,start_y,width,height = map(int,input('type start_x, start_y, width and height in that order').strip().split())
-        on_top_of(style_path, content_path, output_path, start_x, start_y, width, height, num_steps=300)
-    else:
-        print('Wrong input')
-        '''

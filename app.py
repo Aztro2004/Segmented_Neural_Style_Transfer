@@ -1,7 +1,8 @@
 import os
 from flask import Flask, request, render_template, url_for
 from werkzeug.utils import secure_filename
-from network import style_transfer, on_top_of
+from network import style_transfer, on_top_of, run_blended_style
+from network2 import style_transfer as style_transfer_seg
 
 app = Flask(__name__)
 
@@ -23,6 +24,7 @@ def index():
             return "Style or content image missing.", 400
 
         style_image = request.files['style_image']
+        style_image2 = request.files['style_image2']
         content_image = request.files['content_image']
 
         operation = request.form.get('operation')
@@ -40,12 +42,16 @@ def index():
 
         # Saving the images
         style_filename = secure_filename(style_image.filename)
+        style_filename2 = secure_filename(style_image2.filename)
         content_filename = secure_filename(content_image.filename)
 
+
         style_path = os.path.join(app.config['UPLOAD_FOLDER'], style_filename)
+        style_path2 = os.path.join(app.config['UPLOAD_FOLDER'], style_filename2)
         content_path = os.path.join(app.config['UPLOAD_FOLDER'], content_filename)
 
         style_image.save(style_path)
+        style_image2.save(style_path2)
         content_image.save(content_path)
 
         # Output file name and path
@@ -59,7 +65,11 @@ def index():
             width = int(width)
             height = int(height)
             on_top_of(style_path, content_path, output_path, start_x, start_y, width, height)
-        else:
+        elif operation == 'blended_gram':
+            style_transfer_seg(style_path, style_path2, content_path, output_path)
+        elif operation == 'blended_image':
+            run_blended_style(style_path, style_path2, content_path, output_path)
+        elif operation == 'normal_run':
             style_transfer(style_path, content_path, output_path)
 
         # Ensure the image is saved
