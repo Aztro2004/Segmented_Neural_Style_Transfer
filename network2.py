@@ -92,13 +92,11 @@ class StyleLoss(nn.Module):
         super(StyleLoss, self).__init__()
         self.target = gram_matrix(target_feature).detach()
 
-        # Create a weighting tensor using PyTorch
         self.weight = torch.linspace(2, 0, steps=self.target.size(-1)).to(self.target.device)
 
     def forward(self, input):
         G = gram_matrix(input)
 
-        # Ensure the weight tensor is broadcastable
         weighted_target = self.target * self.weight.view(1, -1)
         self.loss = F.mse_loss(G, weighted_target)
         return input
@@ -112,13 +110,11 @@ class StyleLoss2(nn.Module):
         super(StyleLoss2, self).__init__()
         self.target = gram_matrix(target_feature).detach()
 
-        # Create a weighting tensor using PyTorch
         self.weight = torch.linspace(0, 2, steps=self.target.size(-1)).to(self.target.device)
 
     def forward(self, input):
         G = gram_matrix(input)
 
-        # Ensure the weight tensor is broadcastable
         weighted_target = self.target * self.weight.view(1, -1)
         self.loss = F.mse_loss(G, weighted_target)
         return input
