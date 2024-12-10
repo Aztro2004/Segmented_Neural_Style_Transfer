@@ -8,12 +8,15 @@ Diego Maldonado Castro: diegomaldonadocastro1805@gmail.com
 
 UI:
 
-<img width="956" alt="Screenshot 2024-12-05 at 9 22 11 a m" src="https://github.com/user-attachments/assets/1e8f8d79-0a88-46a2-aaa3-6ef66665bca9">
+<img width="945" alt="Screenshot 2024-12-10 at 3 55 54 p m" src="https://github.com/user-attachments/assets/9b4bc826-9dad-4a04-bec1-173ff1ac5128">
 
+On top of menu UI
 
-Image Displayed:
+<img width="878" alt="Screenshot 2024-12-10 at 3 57 48 p m" src="https://github.com/user-attachments/assets/2629a09f-a2a7-44cc-8417-b884b71c2ebd">
 
-<img width="842" alt="Screenshot 2024-12-05 at 9 22 07 a m" src="https://github.com/user-attachments/assets/6c8c6eed-baca-4dbe-8432-e21754490c61">
+Image Displayed after neural style transfer (by Gram Matrix Weighting):
+
+<img width="941" alt="Screenshot 2024-12-10 at 3 55 22 p m" src="https://github.com/user-attachments/assets/4f84567d-5304-4e33-883a-374cb878dfb2">
 
 
 ## Results
