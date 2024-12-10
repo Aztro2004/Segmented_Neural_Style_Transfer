@@ -14,7 +14,7 @@ Diego Maldonado Castro: diegomaldonadocastro1805@gmail.com
 
 <img width="878" alt="Screenshot 2024-12-10 at 3 57 48 p m" src="https://github.com/user-attachments/assets/2629a09f-a2a7-44cc-8417-b884b71c2ebd">
 
-Image Displayed after neural style transfer (by Gram Matrix Weighting):
+#### Image Displayed after neural style transfer (by Gram Matrix Weighting):
 
 <img width="941" alt="Screenshot 2024-12-10 at 3 55 22 p m" src="https://github.com/user-attachments/assets/4f84567d-5304-4e33-883a-374cb878dfb2">
 
