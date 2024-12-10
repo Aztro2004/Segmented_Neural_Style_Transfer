@@ -41,7 +41,7 @@ Image Displayed:
 
 ![image_675_1](https://github.com/user-attachments/assets/4fd79fb3-41b5-48fc-8f45-383bb1197704)
 
-### Content Image
+#### Content Image
 
 ![capi_r](https://github.com/user-attachments/assets/9243fc33-81ab-4155-bcee-934fbbccacd9)
 
