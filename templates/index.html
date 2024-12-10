@@ -8,127 +8,160 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #f4f7f6;
-            color: #333;
+            padding: 20px;
+            background-color: #f9f9f9;
         }
 
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px;
-            text-align: center;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
-            font-size: 2em;
+            text-align: center;
+            color: #333;
             margin-bottom: 20px;
         }
 
         form {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        form label {
-            display: block;
-            margin: 10px 0 5px;
+        label {
             font-weight: bold;
+            color: #555;
         }
 
-        form input[type="file"],
-        form input[type="text"],
-        form select,
-        form button {
-            width: 100%;
+        input[type="file"], input[type="text"], select, button {
             padding: 12px;
-            margin: 8px 0 20px;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+            border-radius: 6px;
+            font-size: 16px;
         }
 
-        form button {
-            background-color: #4CAF50;
+        select, input[type="text"] {
+            width: 100%;
+        }
+
+        button {
+            background-color: #007bff;
             color: white;
             border: none;
             cursor: pointer;
+            font-size: 16px;
         }
 
-        form button:hover {
-            background-color: #45a049;
+        button:hover {
+            background-color: #0056b3;
         }
 
-        .output-container {
+        #onTopOfParams {
+            display: none;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .response {
+            margin-top: 20px;
             text-align: center;
-            margin-top: 30px;
         }
 
-        .output-container img {
-            max-width: 90%;
+        .response p {
+            font-size: 18px;
+        }
+
+        .response a {
+            font-size: 16px;
+            color: #007bff;
+        }
+
+        .response a:hover {
+            text-decoration: underline;
+        }
+
+        .image-preview {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .image-preview img {
+            max-width: 100%;
             height: auto;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .footer {
-            text-align: center;
-            padding: 20px;
-            background-color: #333;
-            color: white;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Style Transfer Application</h1>
-        <p>Upload your style and content images for neural style transfer</p>
-    </header>
-
-    <!-- Form to upload images -->
-    <form action="/" method="post" enctype="multipart/form-data">
-        <label for="style_image">Style Image:</label>
-        <input type="file" name="style_image" id="style_image" required>
-
-        <label for="content_image">Content Image:</label>
-        <input type="file" name="content_image" id="content_image" required>
-
-        <label for="operation">Operation:</label>
-        <select name="operation" id="operation">
-            <option value="style_transfer">Style Transfer</option>
-            <option value="on_top_of">Partial Transfer (on top of)</option>
-        </select>
-
-        <label for="start_x">Start X:</label>
-        <input type="text" name="start_x" id="start_x" placeholder="X-coordinate">
-
-        <label for="start_y">Start Y:</label>
-        <input type="text" name="start_y" id="start_y" placeholder="Y-coordinate">
-
-        <label for="width">Width:</label>
-        <input type="text" name="width" id="width" placeholder="Width of the transfer area">
-
-        <label for="height">Height:</label>
-        <input type="text" name="height" id="height" placeholder="Height of the transfer area">
-
-        <button type="submit">Submit</button>
-    </form>
-
-    <!-- Display the output image if the URL is provided -->
-    {% if image_url %}
-        <div class="output-container">
+    <div class="container">
+        <h1>Style Transfer</h1>
+        
+        <!-- Form to upload images -->
+        <form action="/" method="post" enctype="multipart/form-data">
+            <label for="style_image">Style Image 1:</label>
+            <input type="file" name="style_image" id="style_image" required>
+            
+            <label for="style_image2">Style Image 2 (optional):</label>
+            <input type="file" name="style_image2" id="style_image2">
+            
+            <label for="content_image">Content Image:</label>
+            <input type="file" name="content_image" id="content_image" required>
+            
+            <label for="operation">Operation:</label>
+            <select name="operation" id="operation" onchange="toggleOnTopOfParams()">
+                <option value="normal_run">Normal Style Transfer</option>
+                <option value="on_top_of">Partial Transfer (on top of)</option>
+                <option value="blended_gram">Blended Style (Gram)</option>
+                <option value="blended_image">Blended Style (Image)</option>
+            </select>
+    
+            <div id="onTopOfParams" style="display: none;">
+                <label for="start_x">Start X:</label>
+                <input type="text" name="start_x" id="start_x">
+                
+                <label for="start_y">Start Y:</label>
+                <input type="text" name="start_y" id="start_y">
+                
+                <label for="width">Width:</label>
+                <input type="text" name="width" id="width">
+                
+                <label for="height">Height:</label>
+                <input type="text" name="height" id="height">
+            </div>
+            
+            <button type="submit">Submit</button>
+        </form>
+        
+        {% if image_url %}
             <h2>Result Image</h2>
-            <img src="{{ url_for('static', filename='output/output.jpg') }}" alt="Processed Image">
-        </div>
-    {% endif %}
+            <div class="image-preview">
+                <img src="{{ image_url }}" alt="Processed Image">
+            </div>
+        {% endif %}
+    </div>
 
-
+    <script>
+        // Toggle visibility of the parameters for 'on_top_of' operation
+        function toggleOnTopOfParams() {
+            const operation = document.getElementById('operation').value;
+            const paramsDiv = document.getElementById('onTopOfParams');
+            if (operation === 'on_top_of') {
+                paramsDiv.style.display = 'block';
+            } else {
+                paramsDiv.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
