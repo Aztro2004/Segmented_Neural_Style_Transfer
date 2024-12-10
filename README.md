@@ -6,11 +6,11 @@ Diego Maldonado Castro: diegomaldonadocastro1805@gmail.com
 ## App
 
 
-UI:
+#### UI:
 
 <img width="945" alt="Screenshot 2024-12-10 at 3 55 54 p m" src="https://github.com/user-attachments/assets/9b4bc826-9dad-4a04-bec1-173ff1ac5128">
 
-On top of menu UI
+#### On top of menu UI:
 
 <img width="878" alt="Screenshot 2024-12-10 at 3 57 48 p m" src="https://github.com/user-attachments/assets/2629a09f-a2a7-44cc-8417-b884b71c2ebd">
 
