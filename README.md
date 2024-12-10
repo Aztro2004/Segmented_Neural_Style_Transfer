@@ -41,6 +41,11 @@ Image Displayed:
 
 ![image_675_1](https://github.com/user-attachments/assets/4fd79fb3-41b5-48fc-8f45-383bb1197704)
 
+### Content Image
+
+![capi_r](https://github.com/user-attachments/assets/9243fc33-81ab-4155-bcee-934fbbccacd9)
+
+
 #### Blending Images:
 
 ![blending](https://github.com/user-attachments/assets/ddf5b733-84aa-4222-8561-ac26ec20ca18)
