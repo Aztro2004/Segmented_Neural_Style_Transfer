@@ -2,6 +2,8 @@
 An app that allows you to perform neural style transfer with desired segments.
 Diego Maldonado Castro: diegomaldonadocastro1805@gmail.com
 
+For now quaility of the output is directly implemented in the network(s).py. 
+
 ## App
 
 
