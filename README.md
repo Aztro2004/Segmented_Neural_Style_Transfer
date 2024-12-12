@@ -57,6 +57,9 @@ For now quaility of the output is directly implemented in the network(s).py.
 #### Using Weighted Gram Matrixes
 ![cimbined_gram_loss](https://github.com/user-attachments/assets/5dffdcd3-a502-4ba4-ac54-7827066032e5)
 
+#### Mean Weighted Gram Matrixes
+
+![Weighted_Mean_Gram](https://github.com/user-attachments/assets/07330621-0e1f-4360-8e8a-51d88d9334af)
 
 
 ## References
