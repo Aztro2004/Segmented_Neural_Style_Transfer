@@ -1,6 +1,5 @@
 # Segmented_Neural_Style_Transfer
-An app that allows you to perform neural style transfer with desired segments. (Until specified this is not a final version)
-## Author
+An app that allows you to perform neural style transfer with desired segments.
 Diego Maldonado Castro: diegomaldonadocastro1805@gmail.com
 
 ## App
