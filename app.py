@@ -3,6 +3,7 @@ from flask import Flask, request, render_template, url_for
 from werkzeug.utils import secure_filename
 from network import style_transfer, on_top_of, run_blended_style
 from network2 import style_transfer as style_transfer_seg
+from network3 import style_transfer as mean_style_trasnfer
 
 app = Flask(__name__)
 
@@ -71,7 +72,8 @@ def index():
             run_blended_style(style_path, style_path2, content_path, output_path)
         elif operation == 'normal_run':
             style_transfer(style_path, content_path, output_path)
-
+        elif operation == 'mean_gram':
+            mean_style_trasnfer(style_path,style_path2,content_path,output_path)
         # Ensure the image is saved
         if not os.path.exists(output_path):
             return f"Error: Output image not saved at {output_path}"
